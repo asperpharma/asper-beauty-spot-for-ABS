@@ -47,10 +47,8 @@ import {
   Tag,
   Trash2,
   Upload,
-  Users,
   Wand2,
 } from "lucide-react";
-import { Link } from "react-router-dom";
 import { getProductImage } from "@/lib/productImageUtils";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -65,9 +63,6 @@ interface Product {
   image_url: string | null;
   brand: string | null;
   pharmacist_note: string | null;
-  is_on_sale: boolean;
-  original_price: number | null;
-  discount_percent: number | null;
   created_at: string;
   updated_at: string;
   [key: string]: unknown;
@@ -476,16 +471,6 @@ const ManageProducts = () => {
 
             <div className="flex items-center gap-3 flex-wrap">
               <Button
-                asChild
-                variant="outline"
-                className="border-accent/30 text-accent hover:bg-accent/10"
-              >
-                <Link to="/admin/sale-subscribers">
-                  <Users className="w-4 h-4 me-2" />
-                  Subscribers
-                </Link>
-              </Button>
-              <Button
                 onClick={() => setIsSaleDialogOpen(true)}
                 variant="outline"
                 className="border-destructive/30 text-destructive hover:bg-destructive/10"
@@ -796,16 +781,16 @@ const ManageProducts = () => {
                           </span>
                         </TableCell>
                         <TableCell className="text-right">
-                          {product.is_on_sale && product.original_price ? (
+                          {(product as any).is_on_sale && (product as any).original_price ? (
                             <div className="flex flex-col items-end">
                               <span className="line-through text-muted-foreground text-xs">
-                                {formatJOD(Number(product.original_price))}
+                                {formatJOD(Number((product as any).original_price))}
                               </span>
                               <span className="font-semibold text-destructive">
                                 {formatJOD(Number(product.price))}
                               </span>
                               <Badge className="bg-destructive/10 text-destructive border-destructive/20 text-[10px] mt-0.5">
-                                {product.discount_percent}% OFF
+                                {(product as any).discount_percent}% OFF
                               </Badge>
                             </div>
                           ) : (
@@ -863,7 +848,7 @@ const ManageProducts = () => {
       <BulkSaleManager
         open={isSaleDialogOpen}
         onOpenChange={setIsSaleDialogOpen}
-        products={products}
+        products={products as any}
         onComplete={async () => {
           const { data } = await supabase
             .from("products")

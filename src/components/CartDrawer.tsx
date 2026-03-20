@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Sheet,
@@ -8,7 +8,6 @@ import {
 } from "@/components/ui/sheet";
 import {
   ArrowLeft,
-  ExternalLink,
   Loader2,
   Lock,
   Minus,
@@ -42,14 +41,11 @@ export const CartDrawer = () => {
   const {
     items,
     isLoading,
-    isSyncing,
     isOpen,
     updateQuantity,
     removeItem,
     setOpen,
     getTotalPrice,
-    getCheckoutUrl,
-    syncCart,
   } = useCartStore();
 
   const totalPrice = getTotalPrice();
@@ -61,20 +57,8 @@ export const CartDrawer = () => {
   const hasFreeShipping = totalPrice >= FREE_SHIPPING_THRESHOLD;
 
   const handleCheckout = () => {
-    const checkoutUrl = getCheckoutUrl();
-    if (checkoutUrl) {
-      window.open(checkoutUrl, "_blank");
-      setOpen(false);
-    } else {
-      // Fallback to COD if no Shopify cart
-      setCheckoutMode("cod");
-    }
+    setCheckoutMode("cod");
   };
-
-  // Sync cart with Shopify when drawer opens
-  useEffect(() => {
-    if (isOpen) syncCart();
-  }, [isOpen, syncCart]);
 
   const handleDrawerOpen = (open: boolean) => {
     handleOpenChange(open);
@@ -388,26 +372,26 @@ export const CartDrawer = () => {
 
                     {/* Checkout Buttons */}
                     <div className="flex flex-col gap-3">
-                      {/* Primary: Shopify Checkout */}
+                      {/* Primary: COD */}
                       <button
-                        onClick={handleCheckout}
-                        disabled={items.length === 0 || isLoading || isSyncing}
+                        onClick={() => setCheckoutMode("cod")}
+                        disabled={items.length === 0 || isLoading}
                         className="w-full py-4 font-body text-xs font-semibold uppercase tracking-[0.2em] text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 active:scale-[0.98]"
                         style={{ backgroundColor: "hsl(var(--burgundy))" }}
                         onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "hsl(var(--burgundy-dark))"}
                         onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "hsl(var(--burgundy))"}
                       >
-                        {isLoading || isSyncing ? <Loader2 className="w-4 h-4 animate-spin" /> : (
+                        {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : (
                           <>
-                            <ExternalLink className="w-4 h-4" />
-                            {isArabic ? "إتمام الشراء" : "Checkout with Shopify"}
+                            <Truck className="w-4 h-4" />
+                            {isArabic ? "تأمين الروتين والدفع عند الاستلام" : "Secure Regimen & Checkout"}
                           </>
                         )}
                       </button>
 
-                      {/* Secondary: COD */}
+                      {/* Secondary: Card */}
                       <button
-                        onClick={() => setCheckoutMode("cod")}
+                        onClick={handleCheckout}
                         disabled={items.length === 0 || isLoading}
                         className="w-full py-3 font-body text-xs font-semibold uppercase tracking-[0.15em] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 active:scale-[0.98]"
                         style={{
@@ -424,8 +408,8 @@ export const CartDrawer = () => {
                           e.currentTarget.style.color = "hsl(var(--burgundy))";
                         }}
                       >
-                        <Truck className="w-4 h-4" />
-                        {isArabic ? "الدفع عند الاستلام" : "Cash on Delivery"}
+                        <Lock className="w-4 h-4" />
+                        {isArabic ? "الدفع بالبطاقة" : "Pay with Card"}
                       </button>
                     </div>
                   </div>
